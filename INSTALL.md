@@ -1,4 +1,4 @@
-This project the "Simple and Fast Multimedia Library" SFML
+This project uses SFML "Simple and Fast Multimedia Library" 
 SFML provides a simple interface to the various components of your PC, to ease the development of games and multimedia applications. It is composed of five modules: system, window, graphics, audio and network.
 
 To download SFML - [SFML](https://www.sfml-dev.org/download/)
