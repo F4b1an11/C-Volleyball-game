@@ -4,9 +4,8 @@
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({500, 500}), "SFML works! | Regina was here :D");
-    sf::RenderWindow window(sf::VideoMode({500, 500}), "SFML works!");
     sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Blue);
+    shape.setFillColor(sf::Color::Red);
     shape.setPosition(sf::Vector2(0.f, 0.f));
 
     sf::CircleShape shapeR(100.f);
