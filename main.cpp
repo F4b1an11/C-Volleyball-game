@@ -4,16 +4,14 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({512, 512}), "SFML works! | Regina was here :D",sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode({2048, 1024}), "SFML works! | Regina was here :D",sf::Style::Default);
     sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Red);
+    shape.setFillColor(sf::Color::White);
     shape.setPosition(sf::Vector2(0.f, 0.f));
-
-    sf::CircleShape shapeR(100.f);
-    shapeR.setFillColor(sf::Color::Blue);
-    shapeR.setPosition(sf::Vector2(150.f, 150.f));
+    sf::RectangleShape player1({69.f,100.0f});
+    player1.setFillColor(sf::Color::Blue);
+    player1.setPosition(player1.getGeometricCenter());
     window.setFramerateLimit(60);
-
     while (window.isOpen())
     {
         
@@ -25,8 +23,24 @@ int main()
                 window.close();
                 }
             else if (const auto keypressed = event->getIf<sf::Event::KeyPressed>()){
+                sf::Vector2f right = {10.0f,0.0f};
+                sf::Vector2f left = {-10.0f,0.0f};
+                sf::Vector2f up = {0.0f,-10.0f};
+                sf::Vector2f down = {0.0f,10.0f};
                 if(keypressed->scancode == sf::Keyboard::Scancode::Escape){
                     window.close();
+                }
+                else if(keypressed->scancode == sf::Keyboard::Scancode::Right){
+                    player1.move(right);
+                }
+                else if(keypressed->scancode == sf::Keyboard::Scancode::Left){
+                    player1.move(left);
+                }
+                else if(keypressed->scancode == sf::Keyboard::Scancode::Up){
+                    player1.move(up);
+                }
+                else if(keypressed->scancode == sf::Keyboard::Scancode::Down){
+                    player1.move(down);
                 }
             }
             else if (event->is<sf::Event::Resized>()){
@@ -36,17 +50,12 @@ int main()
             else if (event->is<sf::Event::MouseButtonPressed>()){
                 std::cout << "Mouse Click" << std::endl;
             }
-
-            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()){
-                if (keyPressed->scancode == sf::Keyboard::Scancode::A)
-                    std::cout << "A was typed \n";
-            }
         }
         
 
         window.clear();
         window.draw(shape);
-        window.draw(shapeR);
+        window.draw(player1);
         window.display();
     }
 }
