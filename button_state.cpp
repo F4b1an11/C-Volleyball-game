@@ -2,8 +2,6 @@
 struct Button_State{
     bool is_down;
     bool changed;
-    sf::Clock time_down;
-    
     
 };
 

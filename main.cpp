@@ -77,14 +77,12 @@ int main()
             if(sf::Keyboard::isKeyPressed(ButtonKeys[i])){
                 if(!input.buttons[i].is_down){
                     input.buttons[i].changed = true;
-                    input.buttons[i].time_down.restart();
                 }
                 input.buttons[i].is_down = true;
             }
             else{
                 if(input.buttons [i].is_down){
                 input.buttons[i].changed = true;
-                input.buttons [i].time_down.reset();     
                 }
                 input.buttons [i].is_down = false;
             }
