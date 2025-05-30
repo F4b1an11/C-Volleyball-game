@@ -27,7 +27,7 @@ int main()
     player2.setOrigin(player2.getGeometricCenter());
     player2.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)- player2.getSize().y/2});
     
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(120);
     window.setMinimumSize(sf::Vector2u(200u,200u));
 
     
@@ -38,6 +38,9 @@ int main()
         sf::Keyboard::Scancode::Right,
     };
 
+    sf::Vector2f velocity = {0.0f,0.0f};
+    sf::Vector2f acceleration = {0.0f, 0.0f};
+    sf::Clock timeDelta;
     
     while (window.isOpen())
     {
@@ -87,41 +90,62 @@ int main()
             }
         }
         //simulate game
-        
-        std::cout << player1.getPosition().y << "\n";
+        float dt = timeDelta.restart().asMilliseconds();
+        const float ACC = 0.01f;
+        const float fr = 0.95f;
+        acceleration = {0.0f,0.0f};
+
+        if(input.buttons[BUTTON_UP].is_down){
+            acceleration.y = -ACC;
+        }
+        else if (input.buttons[BUTTON_DOWN].is_down){
+            acceleration.y = ACC;
+        }
+        if (input.buttons[BUTTON_LEFT].is_down){
+            acceleration.x = -ACC;
+        }
+        else if (input.buttons[BUTTON_RIGHT].is_down){
+            acceleration.x = ACC;
+        }
+        const float gravity = -0.001f;
+        acceleration.y -= gravity; 
+        velocity += acceleration * dt;
+        velocity *= fr;
+        player1.move(velocity * dt);
+
         //std::cout << bound.getPosition().y << " " << bound.getSize().y << " \n";
-        if(input.buttons[BUTTON_UP].is_down == true){
-          if(player1.getPosition().y - player1.getSize().y/2 > bound.getPosition().y - bound.getSize().y/2){
-            player1.move({0, -.1f*input.buttons [BUTTON_UP].time_down.getElapsedTime().asMilliseconds()});
-          }
-          else
-          player1.setPosition({player1.getPosition().x, bound.getPosition().y - bound.getSize().y/2 + player1.getSize().y/2 });
+        // if(input.buttons[BUTTON_UP].is_down == true){
+        //   if(player1.getPosition().y - player1.getSize().y/2 > bound.getPosition().y - bound.getSize().y/2){
+        //     player1.move({0, -.1f*input.buttons [BUTTON_UP].time_down.getElapsedTime().asMilliseconds()});
+        //   }
+        //   else
+        //   player1.setPosition({player1.getPosition().x, bound.getPosition().y - bound.getSize().y/2 + player1.getSize().y/2 });
             
-        } 
-        if(input.buttons[BUTTON_DOWN].is_down == true){
-          if(player1.getPosition().y + player1.getSize().y/2 < bound.getPosition().y + bound.getSize().y/2){
-            player1.move({0, .1f*input.buttons [BUTTON_DOWN].time_down.getElapsedTime().asMilliseconds()});
-          }
-          else
-          player1.setPosition({player1.getPosition().x, bound.getPosition().y + bound.getSize().y/2 - player1.getSize().y/2 });
+        // } 
+        // if(input.buttons[BUTTON_DOWN].is_down == true){
+        //   if(player1.getPosition().y + player1.getSize().y/2 < bound.getPosition().y + bound.getSize().y/2){
+        //     player1.move({0, .1f*input.buttons [BUTTON_DOWN].time_down.getElapsedTime().asMilliseconds()});
+        //   }
+        //   else
+        //   player1.setPosition({player1.getPosition().x, bound.getPosition().y + bound.getSize().y/2 - player1.getSize().y/2 });
           
-        } 
-        if(input.buttons[BUTTON_LEFT].is_down == true){
-          if(player1.getPosition().x - player1.getSize().x/2 > bound.getPosition().x - bound.getSize().x/2){
-            player1.move({-.1f*input.buttons [BUTTON_LEFT].time_down.getElapsedTime().asMilliseconds() ,0});
-          }
-          else
-          player1.setPosition({bound.getPosition().x - bound.getSize().x/2 + player1.getSize().x/2 , player1.getPosition().y});
+        // } 
+        // if(input.buttons[BUTTON_LEFT].is_down == true){
+        //   if(player1.getPosition().x - player1.getSize().x/2 > bound.getPosition().x - bound.getSize().x/2){
+        //     player1.move({-.1f*input.buttons [BUTTON_LEFT].time_down.getElapsedTime().asMilliseconds() ,0});
+        //   }
+        //   else
+        //   player1.setPosition({bound.getPosition().x - bound.getSize().x/2 + player1.getSize().x/2 , player1.getPosition().y});
                      
-        } 
-        if(input.buttons[BUTTON_RIGHT].is_down == true){
-          if(player1.getPosition().x + player1.getSize().x/2 < bound.getPosition().x + bound.getSize().x/2){
-            player1.move({.1f*input.buttons [BUTTON_RIGHT].time_down.getElapsedTime().asMilliseconds() ,0});
-          }
-          else
-          player1.setPosition({bound.getPosition().x + bound.getSize().x/2 - player1.getSize().x/2 , player1.getPosition().y});
+        // } 
+        // if(input.buttons[BUTTON_RIGHT].is_down == true){
+        //   if(player1.getPosition().x + player1.getSize().x/2 < bound.getPosition().x + bound.getSize().x/2){
+        //     player1.move({.1f*input.buttons [BUTTON_RIGHT].time_down.getElapsedTime().asMilliseconds() ,0});
+        //   }
+        //   else
+        //   player1.setPosition({bound.getPosition().x + bound.getSize().x/2 - player1.getSize().x/2 , player1.getPosition().y});
                                
-        } 
+        // } 
 
         //rendering
         window.clear();
