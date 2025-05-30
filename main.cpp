@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 #include <iostream>
 #include <math.h>
+#include "button_state.cpp"
 
 int main()
 {
@@ -19,9 +21,20 @@ int main()
     player2.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)- player2.getSize().y/2});
     window.setFramerateLimit(60);
     window.setMinimumSize(sf::Vector2u(200u,200u));
+
+    Input input = {};
+    const sf::Keyboard::Scancode ButtonKeys[BUTTON_COUNT] = {
+        sf::Keyboard::Scancode::Up,
+        sf::Keyboard::Scancode::Down,
+        sf::Keyboard::Scancode::Left,
+        sf::Keyboard::Scancode::Right,
+    };
     while (window.isOpen())
     {
-        
+        for(int i = 0; i < BUTTON_COUNT; i++){
+             input.buttons[i].changed = false;
+        }
+
                 // check all the window's events that were triggered since the last iteration of the loop
         while (const std::optional event = window.pollEvent())
         {
@@ -29,41 +42,6 @@ int main()
                 std::cout << "Closing window \n";
                 window.close();
                 }
-            else if (const auto keypressed = event->getIf<sf::Event::KeyPressed>()){
-                sf::Vector2f right = {10.0f,0.0f};
-                sf::Vector2f left = {-10.0f,0.0f};
-                sf::Vector2f up = {0.0f,-10.0f};
-                sf::Vector2f down = {0.0f,10.0f};
-
-                if(keypressed->scancode == sf::Keyboard::Scancode::Escape){
-                    window.close();
-                    std::cout << "Closeing window \n";
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::Right){
-                    player1.move(right);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::Left){
-                    player1.move(left);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::Up){
-                    player1.move(up);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::Down){
-                    player1.move(down);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::D){
-                    player2.move(right);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::A){
-                    player2.move(left);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::W){
-                    player2.move(up);
-                }
-                else if(keypressed->scancode == sf::Keyboard::Scancode::S){
-                    player2.move(down);
-                }
-            }
             else if (event->is<sf::Event::Resized>()){
                 sf::Vector2u size = window.getSize();
                 width = size.x;
@@ -73,12 +51,43 @@ int main()
             else if (event->is<sf::Event::MouseButtonPressed>()){
                 std::cout << "Mouse Click" << std::endl;
             }
+             else if (const auto keypressed = event->getIf<sf::Event::KeyPressed>()){
+               if(keypressed->scancode == sf::Keyboard::Scancode::Escape){
+                    window.close();
+                    std::cout << "Closeing window \n";
+                } 
+             }
         }
-        
 
+
+        for(int i = 0; i < BUTTON_COUNT; i++){
+            if(sf::Keyboard::isKeyPressed(ButtonKeys[i])){
+                if(!input.buttons[i].is_down){
+                    input.buttons[i].changed = true;
+                    input.buttons[i].time_down.restart();
+                }
+                input.buttons[i].is_down = true;
+            }
+            else{
+                if(input.buttons [i].is_down){
+                input.buttons[i].changed = true;
+                input.buttons [i].time_down.reset();     
+                }
+                input.buttons [i].is_down = false;
+            }
+        }
+        //simulate game
+
+        if(input.buttons[BUTTON_UP].is_down == true) player1.move({0, -.1f*input.buttons [BUTTON_UP].time_down.getElapsedTime().asMilliseconds()});
+        if(input.buttons[BUTTON_DOWN].is_down == true) player1.move({0, .1f*input.buttons [BUTTON_DOWN].time_down.getElapsedTime().asMilliseconds()});
+        if(input.buttons[BUTTON_LEFT].is_down == true) player1.move({-.1f*input.buttons [BUTTON_LEFT].time_down.getElapsedTime().asMilliseconds() ,0});
+        if(input.buttons[BUTTON_RIGHT].is_down == true) player1.move({.1f*input.buttons [BUTTON_RIGHT].time_down.getElapsedTime().asMilliseconds() ,0});
+
+        //rendering
         window.clear();
         window.draw(player2);
         window.draw(player1);
         window.display();
     }
+
 }
