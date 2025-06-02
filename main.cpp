@@ -14,13 +14,18 @@ int main()
     sf::RectangleShape bound({width -58.0f, height - 144.0f});
     bound.setOrigin(bound.getGeometricCenter());
     bound.setPosition({static_cast<float>(width)/2,static_cast<float>(height)/2});
-    bound.setFillColor( sf::Color(0xDCDCDCFF));
+    bound.setFillColor( sf::Color(0xFD5E53FF));
     Input input = {};
+
+    sf::RectangleShape bottomBound({static_cast<float>(width), 50.0f});
+    bottomBound.setOrigin(bottomBound.getGeometricCenter());
+    bottomBound.setFillColor(sf::Color(0xDFDFDFFF));
+    bottomBound.setPosition({static_cast<float>(width)/2.0f,static_cast<float>(height)-50.0f});
 
     sf::RectangleShape player1({69.f,100.0f});
     player1.setFillColor(sf::Color::Blue);
     player1.setOrigin(player1.getGeometricCenter());
-    player1.setPosition({bound.getPosition().x/2 , bound.getPosition().y + bound.getSize().y/2 - player1.getSize().y/2});
+    player1.setPosition({bottomBound.getPosition().x/2 , static_cast<float>(height)});
     
     sf::RectangleShape player2({69.f,100.0f});
     player2.setFillColor(sf::Color::Red);
@@ -41,9 +46,14 @@ int main()
     sf::Vector2f velocity = {0.0f,0.0f};
     sf::Vector2f acceleration = {0.0f, 0.0f};
     sf::Clock timeDelta;
-    
+    const float ACC = 0.01f;
+    const float fr = 0.95f;
+    const float gravity = -0.015f;
+    float dt = timeDelta.restart().asMilliseconds();
+
     while (window.isOpen())
     {
+        dt = timeDelta.restart().asMilliseconds();
         for(int i = 0; i < BUTTON_COUNT; i++){
              input.buttons[i].changed = false;
         }
@@ -72,6 +82,7 @@ int main()
              }
         }
 
+        
 
         for(int i = 0; i < BUTTON_COUNT; i++){
             if(sf::Keyboard::isKeyPressed(ButtonKeys[i])){
@@ -88,13 +99,12 @@ int main()
             }
         }
         //simulate game
-        float dt = timeDelta.restart().asMilliseconds();
-        const float ACC = 0.01f;
-        const float fr = 0.95f;
+        
+
         acceleration = {0.0f,0.0f};
 
-        if(input.buttons[BUTTON_UP].is_down){
-            acceleration.y = -ACC;
+        if(input.buttons[BUTTON_UP].is_down && ((bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player1.getPosition().y + player1.getSize().y/2) < 1)){
+            acceleration.y  = -ACC*75;
         }
         else if (input.buttons[BUTTON_DOWN].is_down){
             acceleration.y = ACC;
@@ -105,49 +115,21 @@ int main()
         else if (input.buttons[BUTTON_RIGHT].is_down){
             acceleration.x = ACC;
         }
-        const float gravity = -0.001f;
+        std:: cout << (bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player1.getPosition().y + player1.getSize().y/2)<< "\n";
         acceleration.y -= gravity; 
         velocity += acceleration * dt;
         velocity *= fr;
-        player1.move(velocity * dt);
+        std::cout << dt << " time \n";
+        if(dt < 20) player1.move(velocity * dt);
+        
+        if(bottomBound.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
+            player1.setPosition({player1.getPosition().x ,bottomBound.getPosition().y - bottomBound.getSize().y/2 - player1.getSize().y/2 +1 });
+        }
+        
 
-        //std::cout << bound.getPosition().y << " " << bound.getSize().y << " \n";
-        // if(input.buttons[BUTTON_UP].is_down == true){
-        //   if(player1.getPosition().y - player1.getSize().y/2 > bound.getPosition().y - bound.getSize().y/2){
-        //     player1.move({0, -.1f*input.buttons [BUTTON_UP].time_down.getElapsedTime().asMilliseconds()});
-        //   }
-        //   else
-        //   player1.setPosition({player1.getPosition().x, bound.getPosition().y - bound.getSize().y/2 + player1.getSize().y/2 });
-            
-        // } 
-        // if(input.buttons[BUTTON_DOWN].is_down == true){
-        //   if(player1.getPosition().y + player1.getSize().y/2 < bound.getPosition().y + bound.getSize().y/2){
-        //     player1.move({0, .1f*input.buttons [BUTTON_DOWN].time_down.getElapsedTime().asMilliseconds()});
-        //   }
-        //   else
-        //   player1.setPosition({player1.getPosition().x, bound.getPosition().y + bound.getSize().y/2 - player1.getSize().y/2 });
-          
-        // } 
-        // if(input.buttons[BUTTON_LEFT].is_down == true){
-        //   if(player1.getPosition().x - player1.getSize().x/2 > bound.getPosition().x - bound.getSize().x/2){
-        //     player1.move({-.1f*input.buttons [BUTTON_LEFT].time_down.getElapsedTime().asMilliseconds() ,0});
-        //   }
-        //   else
-        //   player1.setPosition({bound.getPosition().x - bound.getSize().x/2 + player1.getSize().x/2 , player1.getPosition().y});
-                     
-        // } 
-        // if(input.buttons[BUTTON_RIGHT].is_down == true){
-        //   if(player1.getPosition().x + player1.getSize().x/2 < bound.getPosition().x + bound.getSize().x/2){
-        //     player1.move({.1f*input.buttons [BUTTON_RIGHT].time_down.getElapsedTime().asMilliseconds() ,0});
-        //   }
-        //   else
-        //   player1.setPosition({bound.getPosition().x + bound.getSize().x/2 - player1.getSize().x/2 , player1.getPosition().y});
-                               
-        // } 
-
-        //rendering
         window.clear();
         window.draw(bound);
+        window.draw(bottomBound);
         window.draw(player2);
         window.draw(player1);
         window.display();
