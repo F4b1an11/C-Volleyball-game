@@ -6,8 +6,8 @@
 
 int main()
 {
-    u_int32_t width = 2048U;
-    u_int32_t height = 1024U;
+    u_int32_t width = 1420U;
+    u_int32_t height = 720U;
 
     sf::RenderWindow window(sf::VideoMode({width, height}), "SFML works! | Regina was here :D",sf::Style::Default);
     
@@ -115,7 +115,8 @@ int main()
         else if (input.buttons[BUTTON_RIGHT].is_down){
             acceleration.x = ACC;
         }
-        std:: cout << (bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player1.getPosition().y + player1.getSize().y/2)<< "\n";
+        //std:: cout << (bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player1.getPosition().y + player1.getSize().y/2)<< "\n";
+        std::cout << player1.getPosition().x << " = x, " << player1.getPosition().y << " = y\n";
         acceleration.y -= gravity; 
         velocity += acceleration * dt;
         velocity *= fr;
