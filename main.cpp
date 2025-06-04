@@ -31,6 +31,7 @@ int main()
     player2.setFillColor(sf::Color::Red);
     player2.setOrigin(player2.getGeometricCenter());
     player2.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)- player2.getSize().y/2});
+    Input input2 = {};
     
     window.setFramerateLimit(120);
     window.setMinimumSize(sf::Vector2u(200u,200u));
@@ -43,8 +44,17 @@ int main()
         sf::Keyboard::Scancode::Right,
     };
 
+    const sf::Keyboard::Scancode WasdKeys[BUTTON_COUNT] = {
+        sf::Keyboard::Scancode::W,
+        sf::Keyboard::Scancode::S,
+        sf::Keyboard::Scancode::A,
+        sf::Keyboard::Scancode::D,
+    };
+
     sf::Vector2f velocity = {0.0f,0.0f};
     sf::Vector2f acceleration = {0.0f, 0.0f};
+    sf::Vector2f velocity2 = {0.0f,0.0f};
+    sf::Vector2f acceleration2 = {0.0f, 0.0f};
     sf::Clock timeDelta;
     const float ACC = 0.01f;
     const float fr = 0.95f;
@@ -56,6 +66,7 @@ int main()
         dt = timeDelta.restart().asMilliseconds();
         for(int i = 0; i < BUTTON_COUNT; i++){
              input.buttons[i].changed = false;
+             input2.buttons[i].changed = false;
         }
 
                 // check all the window's events that were triggered since the last iteration of the loop
@@ -98,6 +109,22 @@ int main()
                 input.buttons [i].is_down = false;
             }
         }
+
+        //P2 WASD
+        for(int i = 0; i < BUTTON_COUNT; i++){
+            if(sf::Keyboard::isKeyPressed(WasdKeys[i])){
+                if(!input2.buttons[i].is_down){
+                    input2.buttons[i].changed = true;
+                }
+                input2.buttons[i].is_down = true;
+            }
+            else{
+                if(input2.buttons[i].is_down){
+                input2.buttons[i].changed = true;
+                }
+                input2.buttons[i].is_down = false;
+            }
+        }
         //simulate game
         
 
@@ -125,6 +152,32 @@ int main()
         
         if(bottomBound.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
             player1.setPosition({player1.getPosition().x ,bottomBound.getPosition().y - bottomBound.getSize().y/2 - player1.getSize().y/2 +1 });
+        }
+        
+        //P2 WASD
+        acceleration2 = {0.0f,0.0f};
+        if(input2.buttons[BUTTON_UP].is_down && ((bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player2.getPosition().y + player2.getSize().y/2) < 1)){
+            acceleration2.y  = -ACC*75;
+        }
+        else if (input2.buttons[BUTTON_DOWN].is_down){
+            acceleration2.y = ACC;
+        }
+        if (input2.buttons[BUTTON_LEFT].is_down){
+            acceleration2.x = -ACC;
+        }
+        else if (input2.buttons[BUTTON_RIGHT].is_down){
+            acceleration2.x = ACC;
+        }
+        //std:: cout << (bottomBound.getPosition().y - bottomBound.getSize().y/2)-(player1.getPosition().y + player1.getSize().y/2)<< "\n";
+        std::cout << player2.getPosition().x << " = x, " << player2.getPosition().y << " = y\n";
+        acceleration2.y -= gravity; 
+        velocity2 += acceleration2 * dt;
+        velocity2 *= fr;
+        std::cout << dt << " time \n";
+        if(dt < 20) player2.move(velocity2 * dt);
+        
+        if(bottomBound.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
+            player2.setPosition({player2.getPosition().x ,bottomBound.getPosition().y - bottomBound.getSize().y/2 - player2.getSize().y/2 +1 });
         }
         
 
