@@ -46,8 +46,8 @@ int main()
 
     const sf::Keyboard::Scancode WasdKeys[BUTTON_COUNT] = {
         sf::Keyboard::Scancode::W,
-        sf::Keyboard::Scancode::A,
         sf::Keyboard::Scancode::S,
+        sf::Keyboard::Scancode::A,
         sf::Keyboard::Scancode::D,
     };
 
