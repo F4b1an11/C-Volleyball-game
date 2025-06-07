@@ -92,6 +92,10 @@ int main()
     const float fr = 0.95f;
     const float gravity = -0.015f;
     float dt = timeDelta.restart().asMilliseconds();
+    int lastTouch = 0;
+    int consecutiveTouch = 0;
+    int p1Points = 0;
+    int p2Points = 0; 
 
     while (window.isOpen())
     {
@@ -243,13 +247,33 @@ int main()
         
         //player and ball connect
         if(ball.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
+            if(consecutiveTouch == 3 && lastTouch == 2){
+                std::cout << "player 2 point\n";
+            }
             ballVelocity.x = (ball.getPosition().x - player1.getPosition().x)/60;
             ballVelocity.y = -1;
+            if(lastTouch == 1){
+                consecutiveTouch++;
+            }
+            else{
+                consecutiveTouch =1;
+            }
+            lastTouch = 1;
 
         }
         if(ball.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
+            if(consecutiveTouch == 3 && lastTouch == 2){
+                std::cout << "player 1 point\n";
+            }
             ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/60;
             ballVelocity.y = -1;
+            if(lastTouch == 2){
+                consecutiveTouch++;
+            }
+            else{
+                consecutiveTouch =1;
+            }
+            lastTouch = 2;
         }
         
         //ball and bounds connect
