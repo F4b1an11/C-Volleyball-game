@@ -38,15 +38,20 @@ int main()
     rightBound.setFillColor(sf::Color(0xDFDFDFFF));
     rightBound.setPosition({static_cast<float>(width)+35.0f,static_cast<float>(height)/2});
 
-    sf::RectangleShape player1({80.f,100.0f});
-    player1.setFillColor(sf::Color::Blue);
-    player1.setOrigin(player1.getGeometricCenter());
-    player1.setPosition({bottomBound.getPosition().x/2 , static_cast<float>(height)});
-    
-    sf::RectangleShape player2({80.f,100.0f});
-    player2.setFillColor(sf::Color::Red);
+    sf::RectangleShape net({30.0f, 200.0f});
+    net.setOrigin(net.getGeometricCenter());
+    net.setFillColor(sf::Color(0x6F6F6FFF));
+    net.setPosition({static_cast<float>(width)/2,bottomBound.getPosition().y - 100.0f});
+
+    sf::RectangleShape player2({120.f,100.0f});
+    player2.setFillColor(sf::Color::Blue);
     player2.setOrigin(player2.getGeometricCenter());
-    player2.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)- player2.getSize().y/2});
+    player2.setPosition({bottomBound.getPosition().x/2 , static_cast<float>(height)});
+    
+    sf::RectangleShape player1({120.f,100.0f});
+    player1.setFillColor(sf::Color::Red);
+    player1.setOrigin(player1.getGeometricCenter());
+    player1.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)- player2.getSize().y/2});
     Input input2 = {};
 
     sf::RectangleShape ball({20.0f,20.0f});
@@ -83,7 +88,7 @@ int main()
     sf::Vector2f ballAcceleration = {0.0f, 0.0f};
 
     sf::Clock timeDelta;
-    const float ACC = 0.01f;
+    const float ACC = 0.006f;
     const float fr = 0.95f;
     const float gravity = -0.015f;
     float dt = timeDelta.restart().asMilliseconds();
@@ -119,8 +124,6 @@ int main()
                 } 
              }
         }
-
-        
 
         for(int i = 0; i < BUTTON_COUNT; i++){
             if(sf::Keyboard::isKeyPressed(ButtonKeys[i])){
@@ -182,13 +185,22 @@ int main()
             player1.setPosition({player1.getPosition().x ,bottomBound.getPosition().y - bottomBound.getSize().y/2 - player1.getSize().y/2 +1 });
         }
         if(leftBound.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
-            velocity.x = 1;
-            acceleration.y = 1;
+            velocity.x = .2;
+            acceleration.y = .2;
         }
         if(rightBound.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
-            velocity.x = -1;
-            acceleration.y = -1;
+            velocity.x = -.2;
+            acceleration.y = -.2;
         }
+        if(net.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
+            if(player1.getPosition().x > net.getPosition().x){
+                velocity.x = .2;
+            } 
+            else{
+                velocity.x = -.2;
+            }
+        }
+
         
         //P2 WASD
         acceleration2 = {0.0f,0.0f};
@@ -213,22 +225,30 @@ int main()
             player2.setPosition({player2.getPosition().x ,bottomBound.getPosition().y - bottomBound.getSize().y/2 - player2.getSize().y/2 +1 });
         }
         if(leftBound.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
-            velocity2.x = 1;
-            acceleration2.y = 1;
+            velocity2.x = .2;
+            acceleration2.y = .2;
         }
         if(rightBound.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
-            velocity2.x = -1;
-            acceleration2.y = -1;
+            velocity2.x = -.2;
+            acceleration2.y = -.2;
+        }
+        if(net.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
+            if(player2.getPosition().x > net.getPosition().x){
+                velocity2.x = .2;
+            } 
+            else{
+                velocity2.x = -.2;
+            }
         }
         
         //player and ball connect
         if(ball.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
-            ballVelocity.x = (ball.getPosition().x - player1.getPosition().x)/40;
+            ballVelocity.x = (ball.getPosition().x - player1.getPosition().x)/60;
             ballVelocity.y = -1;
 
         }
         if(ball.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
-            ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/40;
+            ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/60;
             ballVelocity.y = -1;
         }
         
@@ -249,12 +269,18 @@ int main()
             ballAcceleration.x = -.01;
             ballVelocity.x *= -1;
         }
+        if(net.getGlobalBounds().findIntersection(ball.getGlobalBounds())){
+            if(ball.getPosition().y < net.getPosition().y - 45){
+                ballVelocity.y = -1;
+            }
+            else{
+                ballVelocity.x *= -1;  
+            }
+        }
 
         ballVelocity *= .999f;
         //ballAcceleration.y += .0001;
         ballVelocity += ballAcceleration * dt;
-        //std::cout << "ball vellocity " << ballVelocity.x << " " << ballVelocity.y << "\n";
-        std::cout << "vellocity " << velocity.x << " " << velocity.y << "\n";
         if(dt < 20)ball.move(ballVelocity * dt);
 
 
@@ -267,6 +293,7 @@ int main()
         window.draw(rightBound);
         window.draw(player2);
         window.draw(player1);
+        window.draw(net);
         window.draw(ball);
         window.display();
     }
