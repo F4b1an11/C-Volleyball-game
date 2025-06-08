@@ -3,6 +3,8 @@
 #include <iostream>
 #include <math.h>
 #include "button_state.cpp" 
+#include <string>
+#include <sstream>
 
     u_int32_t width = 1420U;
     u_int32_t height = 720U;
@@ -76,11 +78,23 @@ int main()
     ball.setFillColor(sf::Color(0xFFFFFFFF));
     ball.setOrigin(ball.getGeometricCenter());
     ball.setPosition({static_cast<float>(width)/3,static_cast<float>(height)*3/4});
-
-
-    
+   
     window.setFramerateLimit(120);
     window.setMinimumSize(sf::Vector2u(200U,200U));
+
+    sf::Font font;
+    font.openFromFile("./fonts/NotoSans-VariableFont_wdth,wght.ttf");
+    sf::Text p1Score(font);
+    p1Score.setString("0");
+    p1Score.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)*1/4});
+    p1Score.setFillColor(sf::Color::White);
+    p1Score.setOutlineColor(sf::Color::Black);
+
+    sf::Text p2Score(font);
+    p2Score.setString("0");
+    p2Score.setPosition({static_cast<float>(width)*1/4, static_cast<float>(height)*1/4});
+    p2Score.setFillColor(sf::Color::White);
+    p2Score.setOutlineColor(sf::Color::Black);
 
     
     const sf::Keyboard::Scancode ButtonKeys[BUTTON_COUNT] = {
@@ -108,7 +122,7 @@ int main()
     sf::Clock timeDelta;
     const float ACC = 0.006f;
     const float fr = 0.95f;
-    const float gravity = -0.015f;
+    const float gravity = -0.009f;
     float dt = timeDelta.restart().asMilliseconds();
     int lastTouch = 0;
     int p1Points = 0;
@@ -362,7 +376,8 @@ int main()
         //ballAcceleration.y += .0001;
         //ballVelocity += ballAcceleration * dt;
         if(dt < 20)ball.move(ballVelocity * dt);
-
+        p1Score.setString(std::to_string(p1Points));
+        p2Score.setString(std::to_string(p2Points));
 
 
         window.clear();
@@ -374,6 +389,8 @@ int main()
         window.draw(player2);
         window.draw(player1);
         window.draw(net);
+        window.draw(p1Score);
+        window.draw(p2Score);
         window.draw(ball);
         window.display();
     }
