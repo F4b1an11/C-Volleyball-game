@@ -3,11 +3,31 @@
 #include <iostream>
 #include <math.h>
 #include "button_state.cpp" 
+#include <string>
+#include <sstream>
+
+    u_int32_t width = 1420U;
+    u_int32_t height = 720U;
+    int consecutiveTouch = 0;
+    bool ballInsidePlayer;
+void setBall(sf::RectangleShape& ball,sf::Vector2f& ballVelocity , sf::Vector2f ballAcceleration, int player){
+    if(player == 1){
+        ball.setPosition({static_cast<float>(width)*3/4,static_cast<float>(height)*3/4});
+    }
+    else if(player == 2){
+        ball.setPosition({static_cast<float>(width)*1/4,static_cast<float>(height)*3/4});
+    }
+    else{
+        std::cerr << "setBall does not recognise player:  " << player << "\n";
+    }
+    ballVelocity = {0,0};
+    ballAcceleration = {0,0};
+    consecutiveTouch = 0;
+}
 
 int main()
 {
-    u_int32_t width = 1420U;
-    u_int32_t height = 720U;
+    
     sf::Vector2u size = {width,height};
 
     sf::RenderWindow window(sf::VideoMode(size), "SFML works! | Regina was here :D",sf::Style::Default);
@@ -57,12 +77,24 @@ int main()
     sf::RectangleShape ball({20.0f,20.0f});
     ball.setFillColor(sf::Color(0xFFFFFFFF));
     ball.setOrigin(ball.getGeometricCenter());
-    ball.setPosition({static_cast<float>(width)/2,static_cast<float>(height)*3/4});
-
-
-    
+    ball.setPosition({static_cast<float>(width)/3,static_cast<float>(height)*3/4});
+   
     window.setFramerateLimit(120);
     window.setMinimumSize(sf::Vector2u(200U,200U));
+
+    sf::Font font;
+    font.openFromFile("./fonts/NotoSans-VariableFont_wdth,wght.ttf");
+    sf::Text p1Score(font);
+    p1Score.setString("0");
+    p1Score.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)*1/4});
+    p1Score.setFillColor(sf::Color::White);
+    p1Score.setOutlineColor(sf::Color::Black);
+
+    sf::Text p2Score(font);
+    p2Score.setString("0");
+    p2Score.setPosition({static_cast<float>(width)*1/4, static_cast<float>(height)*1/4});
+    p2Score.setFillColor(sf::Color::White);
+    p2Score.setOutlineColor(sf::Color::Black);
 
     
     const sf::Keyboard::Scancode ButtonKeys[BUTTON_COUNT] = {
@@ -90,8 +122,11 @@ int main()
     sf::Clock timeDelta;
     const float ACC = 0.006f;
     const float fr = 0.95f;
-    const float gravity = -0.015f;
+    const float gravity = -0.009f;
     float dt = timeDelta.restart().asMilliseconds();
+    int lastTouch = 0;
+    int p1Points = 0;
+    int p2Points = 0; 
 
     while (window.isOpen())
     {
@@ -241,21 +276,80 @@ int main()
             }
         }
         
+        
+        bool changed = false;//Sometimes the ball is inside the player for multiple frames, this bool along with ballInsidePlayer helps keep track of that
         //player and ball connect
         if(ball.getGlobalBounds().findIntersection(player1.getGlobalBounds())){
-            ballVelocity.x = (ball.getPosition().x - player1.getPosition().x)/60;
-            ballVelocity.y = -1;
-
+            if(ballInsidePlayer == false){
+                changed = true;
+            }
+            ballInsidePlayer = true;
+            if(consecutiveTouch == 3 && lastTouch == 1 && changed){
+                p2Points++;
+                setBall(ball,ballVelocity,ballAcceleration,2);
+                consecutiveTouch = 0;
+            }
+            else{
+                ballVelocity.x = (ball.getPosition().x - player1.getPosition().x)/60;
+                if(velocity.y < -1){
+                    ballVelocity.y = velocity.y;
+                }
+                else{
+                    ballVelocity.y = -1;
+                }
+                
+                if(lastTouch == 1){
+                    consecutiveTouch++;
+                }
+                else{
+                    consecutiveTouch = 1;
+                }
+                lastTouch = 1;
+            }   
         }
-        if(ball.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
-            ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/60;
-            ballVelocity.y = -1;
+        else if(ball.getGlobalBounds().findIntersection(player2.getGlobalBounds())){
+            if(ballInsidePlayer == false){
+                changed = true;
+            }
+            ballInsidePlayer = true;
+            if(consecutiveTouch == 3 && lastTouch == 2 && changed){
+                p1Points++;
+                setBall(ball,ballVelocity,ballAcceleration,1);
+                consecutiveTouch = 0;
+            }
+            else{
+                ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/60;
+                ballVelocity.y = -1;
+                if(lastTouch == 2){
+                    consecutiveTouch++;
+                }
+                else{
+                    consecutiveTouch =1;
+                }
+                lastTouch = 2;   
+            } 
+        }
+        else{
+            if(ballInsidePlayer == true){
+                changed = true;
+            }
+            ballInsidePlayer = false;
         }
         
+
+
         //ball and bounds connect
         if(bottomBound.getGlobalBounds().findIntersection(ball.getGlobalBounds())){
             ballAcceleration.y = -.01;
             ballVelocity.y *= -1;
+            if(ball.getPosition().x > width/2){
+                p2Points++;
+                setBall(ball, ballVelocity, ballAcceleration, 2);
+            }
+            else{
+                p1Points++;
+                setBall(ball ,ballVelocity, ballAcceleration, 1);
+            }
         }
         if(topBound.getGlobalBounds().findIntersection(ball.getGlobalBounds())){
             ballAcceleration.y = .01;
@@ -278,11 +372,12 @@ int main()
             }
         }
 
-        ballVelocity *= .999f;
+        //ballVelocity *= .999f;
         //ballAcceleration.y += .0001;
-        ballVelocity += ballAcceleration * dt;
+        //ballVelocity += ballAcceleration * dt;
         if(dt < 20)ball.move(ballVelocity * dt);
-
+        p1Score.setString(std::to_string(p1Points));
+        p2Score.setString(std::to_string(p2Points));
 
 
         window.clear();
@@ -294,6 +389,8 @@ int main()
         window.draw(player2);
         window.draw(player1);
         window.draw(net);
+        window.draw(p1Score);
+        window.draw(p2Score);
         window.draw(ball);
         window.display();
     }
