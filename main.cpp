@@ -299,8 +299,7 @@ int main()
                 }
                 else{
                     ballVelocity.y = -1;
-                }
-                
+                } 
                 if(lastTouch == 1){
                     consecutiveTouch++;
                 }
@@ -322,12 +321,17 @@ int main()
             }
             else{
                 ballVelocity.x = (ball.getPosition().x - player2.getPosition().x)/60;
-                ballVelocity.y = -1;
+                if(velocity2.y < -1){
+                    ballVelocity.y = velocity2.y;
+                }
+                else{
+                    ballVelocity.y = -1;
+                }
                 if(lastTouch == 2){
                     consecutiveTouch++;
                 }
                 else{
-                    consecutiveTouch =1;
+                    consecutiveTouch = 1;
                 }
                 lastTouch = 2;   
             } 
