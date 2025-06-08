@@ -18,7 +18,7 @@ void setBall(sf::RectangleShape& ball,sf::Vector2f& ballVelocity , sf::Vector2f 
         ball.setPosition({static_cast<float>(width)*1/4,static_cast<float>(height)*3/4});
     }
     else{
-        std::cerr << "setBall does not recognise player:  " << player << "\n";
+        std::cerr << "setBall does not recognize player:  " << player << "\n";
     }
     ballVelocity = {0,0};
     ballAcceleration = {0,0};
@@ -83,7 +83,10 @@ int main()
     window.setMinimumSize(sf::Vector2u(200U,200U));
 
     sf::Font font;
-    font.openFromFile("./fonts/NotoSans-VariableFont_wdth,wght.ttf");
+    if(!font.openFromFile("./fonts/NotoSans-VariableFont_wdth,wght.ttf")){
+        std::cerr<< "font not found \n";
+    }
+
     sf::Text p1Score(font);
     p1Score.setString("0");
     p1Score.setPosition({static_cast<float>(width)*3/4, static_cast<float>(height)*1/4});
